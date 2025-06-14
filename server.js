@@ -15,7 +15,7 @@ const employeeRoutes = require('./routes/employeeRoutes');
 app.use('/employees', employeeRoutes);
 
 const skillRoutes = require('./routes/skillRoutes');
-app.use('/skill', skillRoutes);
+app.use('/skills', skillRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
