@@ -50,6 +50,6 @@ const deleteEmployee = (request, response) => {
     employees.splice(employeeIndex, 1);
     // Return success message
     response.status(200).json({ message: 'Employee deleted successfully'})
-}
+};
 
 module.exports = { getAllEmployees, createEmployee, updateEmployee, deleteEmployee }; 
