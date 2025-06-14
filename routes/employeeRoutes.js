@@ -9,10 +9,11 @@ const {
     searchEmployeesBySurname, 
     searchEmployeesBySkill 
 } = require('../controllers/employeeController');
+const { validateEmployee } = require('../middlewares/validation');
 
 router.get('/', getAllEmployees);
-router.post('/', createEmployee);
-router.put('/:id', updateEmployee);
+router.post('/', validateEmployee, createEmployee);
+router.put('/:id', validateEmployee, updateEmployee);
 router.delete('/:id', deleteEmployee);
 
 // Search routes
