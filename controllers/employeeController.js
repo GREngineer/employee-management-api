@@ -44,12 +44,49 @@ const deleteEmployee = (request, response) => {
     const employeeId = request.params.id;
     const employeeIndex = employees.findIndex(emp => emp.id === employeeId);
     if (employeeIndex === -1) {
-        return response.status(404).json({ message: empNotFoundMessage});
+        return response.status(404).json({ message: empNotFoundMessage });
     }
     // Remove employee from array
     employees.splice(employeeIndex, 1);
     // Return success message
-    response.status(200).json({ message: 'Employee deleted successfully'})
+    response.status(200).json({ message: 'Employee deleted successfully' });
 };
 
-module.exports = { getAllEmployees, createEmployee, updateEmployee, deleteEmployee }; 
+// Search employees by name (partial match)
+const searchEmployeesByName = (request, response) => {
+    const searchName = request.params.name.toLowerCase();
+    const matchingEmployees = employees.filter(emp => 
+        emp.name.toLowerCase().includes(searchName)
+    );
+    response.json(matchingEmployees);
+};
+
+// Search employees by surname (partial match)
+const searchEmployeesBySurname = (request, response) => {
+    const searchSurname = request.params.surname.toLowerCase();
+    const matchingEmployees = employees.filter(emp =>
+        emp.surname.toLowerCase().includes(searchSurname)
+    );
+    response.json(matchingEmployees);
+};
+
+// Search employees by skill (find employees who have a specific skill)
+const searchEmployeesBySkill = (request, response) => {
+    const searchSkill = request.params.skill.toLowerCase();
+    const matchingEmployees = employees.filter(emp =>
+        emp.skills && emp.skills.some(skill =>
+            skill.toLowerCase().includes(searchSkill)
+        )
+    );
+    response.json(matchingEmployees);
+};
+
+module.exports = { 
+    getAllEmployees, 
+    createEmployee, 
+    updateEmployee, 
+    deleteEmployee,
+    searchEmployeesByName,
+    searchEmployeesBySurname,
+    searchEmployeesBySkill
+}; 
