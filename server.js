@@ -9,9 +9,13 @@ app.get('/', (request, response) => {
     response.send('Employee Management System - Your one stop solution for your employees');
 });
 
-// Register employee routes before listening to the server
+// Register routes before listening to the server
+
 const employeeRoutes = require('./routes/employeeRoutes');
 app.use('/employees', employeeRoutes);
+
+const skillRoutes = require('./routes/skillRoutes');
+app.use('/skill', skillRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
