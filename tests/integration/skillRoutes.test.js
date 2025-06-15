@@ -4,7 +4,7 @@ const express = require('express');
 // Import app
 const app = require('../../server');
 
-describe('GET /skills test scenarios', () => {
+describe('GET /skills', () => {
     describe('Test status, content and structure of skills endpoint', () => {
         it('Request all skills, return success status and correct format', async () => {
             const response = await request(app)
@@ -39,7 +39,7 @@ describe('GET /skills test scenarios', () => {
     });
 });
 
-describe('POST /skills new skill test cases', () => {
+describe('POST /skills | New skill test cases', () => {
     it('Create new skill with valid data', async () => {
         const newSkill = {
             name: "AI",
@@ -87,9 +87,94 @@ describe('POST /skills new skill test cases', () => {
         expect(response.body).toHaveProperty('error');
         expect(response.body).toHaveProperty('message');
     });
+
+    it('Should return error if name is not a string', async () => {
+        const invalidSkill = {
+            name: 123,
+            description: "Valid description",
+            category: "Programming"
+        };
+
+        const response = await request(app)
+            .post('/skills')
+            .send(invalidSkill)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('must be strings');
+    });
+
+    it('Should return error if description is not a string', async () => {
+        const invalidSkill = {
+            name: "Valid Name",
+            description: 456,
+            category: "Programming"
+        };
+
+        const response = await request(app)
+            .post('/skills')
+            .send(invalidSkill)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('must be strings');
+    });
+
+    it('Should return error if category is not a string', async () => {
+        const invalidSkill = {
+            name: "Valid Name",
+            description: "Valid description",
+            category: 789
+        };
+
+        const response = await request(app)
+            .post('/skills')
+            .send(invalidSkill)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('must be strings');
+    });
+
+    it('Should return error if description is empty string', async () => {
+        const invalidSkill = {
+            name: "Valid Name",
+            description: "",
+            category: "Programming"
+        };
+
+        const response = await request(app)
+            .post('/skills')
+            .send(invalidSkill)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('cannot be empty');
+    });
+
+    it('Return error if category is empty string', async () => {
+        const invalidSkill = {
+            name: "Valid Name",
+            description: "Valid description",
+            category: ""
+        };
+
+        const response = await request(app)
+            .post('/skills')
+            .send(invalidSkill)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('cannot be empty');
+    });
 });
 
-describe('PUT /skills/:id update skills test scenarios', () => {
+describe('PUT /skills/:id | Update skills test scenarios', () => {
     let testSkillId;
 
     beforeEach(async () => {
@@ -142,7 +227,7 @@ describe('PUT /skills/:id update skills test scenarios', () => {
     });
 });
 
-describe('DELETE /skills/:id test scenarios', () => {
+describe('DELETE /skills/:id', () => {
     let testSkillId;
 
     beforeEach(async () => {

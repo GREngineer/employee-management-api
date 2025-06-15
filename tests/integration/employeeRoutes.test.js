@@ -4,7 +4,7 @@ const express = require('express');
 // Import app (will need to modify main server file to export the app)
 const app = require('../../server');
 
-describe('GET /employees retrieval test cases', () => {
+describe('GET /employees', () => {
     describe('Test status, content and structure of employees endpoint', () => {
         it('Request all employees, return success status and correct format', async () => {
             const response = await request(app)
@@ -40,7 +40,7 @@ describe('GET /employees retrieval test cases', () => {
     });
 });
 
-describe('POST /employees new employees test cases', () => {
+describe('POST /employees | New employees test cases', () => {
     it('Create new employee with valid data', async () => {
         const newEmployee = {
             name: "Marios",
@@ -88,9 +88,89 @@ describe('POST /employees new employees test cases', () => {
         expect(response.body).toHaveProperty('error');
         expect(response.body).toHaveProperty('message');
     });
+
+    it('Should return error if name is not a string', async () => {
+        const invalidEmployee = {
+            name: 123,
+            surname: "Papakostas"
+        };
+
+        const response = await request(app)
+            .post('/employees')
+            .send(invalidEmployee)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('must be strings');
+    });
+
+    it('Should return error if surname is not a string', async () => {
+        const invalidEmployee = {
+            name: "Vasileios",
+            surname: 456
+        };
+
+        const response = await request(app)
+            .post('/employees')
+            .send(invalidEmployee)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('must be strings');
+    });
+
+    it('Should return error if name is empty string', async () => {
+        const invalidEmployee = {
+            name: "",
+            surname: "Papakostas"
+        };
+
+        const response = await request(app)
+            .post('/employees')
+            .send(invalidEmployee)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('cannot be empty');
+    });
+
+    it('Should return error if surname is empty string', async () => {
+        const invalidEmployee = {
+            name: "Vasileios",
+            surname: ""
+        };
+
+        const response = await request(app)
+            .post('/employees')
+            .send(invalidEmployee)
+            .expect(400);
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('cannot be empty');
+    });
+
+    it('Should accept employee with valid skills array', async () => {
+        const validEmployee = {
+            name: "Test",
+            surname: "User",
+            skills: ["JavaScript", "Node.js"]
+        };
+
+        const response = await request(app)
+            .post('/employees')
+            .send(validEmployee)
+            .expect(201);
+
+        expect(response.body).toHaveProperty('id');
+        expect(response.body.skills).toEqual(validEmployee.skills);
+    });
 });
 
-describe('PUT /employees/:id update employees test cases', () => {
+describe('PUT /employees/:id | Update employees test cases', () => {
     let testEmployeeId;
 
     beforeEach(async () => {
@@ -155,7 +235,7 @@ describe('PUT /employees/:id update employees test cases', () => {
     });
 });
 
-describe('DELETE /employees/:id test scenarios', () => {
+describe('DELETE /employees/:id', () => {
     let testEmployeeId;
 
     beforeEach(async () => {
@@ -191,5 +271,123 @@ describe('DELETE /employees/:id test scenarios', () => {
 
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('not found');
+    });
+});
+
+describe('Search functionality test cases', () => {
+    beforeEach(async () => {
+        // Create test employees for search tests
+        const testEmployees = [
+            {
+                name: "Stelios",
+                surname: "Vlachakos",
+                skills: ["Marketing", "HR", "Business Administration"]
+            },
+            {
+                name: "Ioanna",
+                surname: "Kokali",
+                skills: ["Compensation", "Compliance", "Marketing"]
+            },
+            {
+                name: "Petros",
+                surname: "Petrochilos",
+                skills: ["Recruitment", "R&D", "Production"]
+            }
+        ];
+
+        for (const employee of testEmployees) {
+            await request(app)
+                .post('/employees')
+                .send(employee);
+        }
+    });
+
+    describe('GET /employees/search/name/:name', () => {
+        it('Find employees by name (partial match)', async () => {
+            const response = await request(app)
+                .get('/employees/search/name/ste')
+                .expect(200);
+
+            expect(Array.isArray(response.body)).toBe(true);
+            expect(response.body.length).toBeGreaterThan(0);
+            expect(response.body.every(emp => 
+                emp.name.toLowerCase().includes('ste')
+            )).toBe(true);
+        });
+
+        it('When no name match return empty array', async () => {
+            const response = await request(app)
+                .get('/employees/search/name/xyz')
+                .expect(200);
+
+            expect(Array.isArray(response.body)).toBe(true);
+            expect(response.body.length).toBe(0);
+        });
+    });
+
+    describe('GET /employees/search/surname/:surname', () => {
+        it('Find employees by surname (partial match)', async () => {
+            const response = await request(app)
+                .get('/employees/search/surname/li')
+                .expect(200);
+
+            expect(Array.isArray(response.body)).toBe(true);
+            expect(response.body.length).toBeGreaterThan(0);
+            expect(response.body.every(emp => 
+                emp.surname.toLowerCase().includes('li')
+            )).toBe(true);
+        });
+
+        it('When no surname match return empty array', async () => {
+            const response = await request(app)
+                .get('/employees/search/surname/xyz')
+                .expect(200);
+
+            expect(Array.isArray(response.body)).toBe(true);
+            expect(response.body.length).toBe(0);
+        });
+    });
+
+    describe('GET /employees/search/skill/:skill | Search employees by skill', () => {
+        it('should find employees by skill (partial match)', async () => {
+            const response = await request(app)
+                .get('/employees/search/skill/marketing')
+                .expect(200);
+
+            expect(Array.isArray(response.body)).toBe(true);
+            expect(response.body.length).toBeGreaterThan(0);
+            expect(response.body.every(emp => 
+                emp.skills && emp.skills.some(skill =>
+                    skill.toLowerCase().includes('marketing')
+                )
+            )).toBe(true);
+        });
+
+        it('When no matching skill return empty array', async () => {
+            const response = await request(app)
+                .get('/employees/search/skill/xyz')
+                .expect(200);
+
+            expect(Array.isArray(response.body)).toBe(true);
+            expect(response.body.length).toBe(0);
+        });
+
+        it('Handle employees without skills array', async () => {
+            // Create employee without skills
+            const employeeWithoutSkills = {
+                name: "Alice",
+                surname: "Brown"
+            };
+
+            await request(app)
+                .post('/employees')
+                .send(employeeWithoutSkills);
+
+            const response = await request(app)
+                .get('/employees/search/skill/javascript')
+                .expect(200);
+
+            expect(Array.isArray(response.body)).toBe(true);
+        });
     });
 });
