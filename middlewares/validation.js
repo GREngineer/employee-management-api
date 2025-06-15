@@ -38,4 +38,37 @@ const validateEmployee = (request, response, next) => {
     next();
 };
 
-module.exports = { validateEmployee };
+// Validate skill data
+const validateSkill = (request, response, next) => {
+    console.log('MIDDLEWARE VALIDATION', request.body)
+    const { name, description, category } = request.body;
+
+    // Check for required fields
+    if (!name || !description || !category) {
+        return response.status(400).json({
+            error: 'Validation Error',
+            message: 'Name, description and category are required fields'
+        });
+    }
+
+    // Check data types
+    if (typeof name !== 'string' || typeof description !== 'string' || typeof category !== 'string') {
+        return response.status(400).json({
+            error: 'Validation Error',
+            message: 'Name, description and category must be strings'
+        });
+    }
+
+    // Check for empty strings
+    if (name.trim() === '' || description.trim() === '' || category.trim() === '') {
+        return response.status(400).json({
+            error: 'Validation Error',
+            message: 'Name, description and category cannot be empty'
+        });
+    }
+
+    // If all validations pass, continue to the next middleware/controller
+    next();
+};
+
+module.exports = { validateEmployee, validateSkill };
