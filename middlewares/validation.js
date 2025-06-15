@@ -2,8 +2,8 @@
 const validateEmployee = (request, response, next) => {
     const { name, surname, skills } = request.body;
 
-    // Check for required fields
-    if (!name || !surname) {
+    // Check for required fields (undefined or null)
+    if (name === undefined || name === null || surname === undefined || surname === null) {
         return response.status(400).json({
             error: 'Validation Error',
             message: 'Name and surname are required fields'
@@ -40,11 +40,10 @@ const validateEmployee = (request, response, next) => {
 
 // Validate skill data
 const validateSkill = (request, response, next) => {
-    console.log('MIDDLEWARE VALIDATION', request.body)
     const { name, description, category } = request.body;
 
-    // Check for required fields
-    if (!name || !description || !category) {
+    // Check for required fields (undefined or null)
+    if (name === undefined || name === null || description === undefined || description === null || category === undefined || category === null) {
         return response.status(400).json({
             error: 'Validation Error',
             message: 'Name, description and category are required fields'
