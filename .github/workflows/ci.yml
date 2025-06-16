@@ -14,7 +14,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x]
+        node-version: [18.x, 20.x]
     
     # Download repo to runner & install node
     steps:
@@ -122,7 +122,7 @@ jobs:
         echo "Deployment package created"
         
     - name: Upload deployment artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: deployment-package
         path: dist/
