@@ -39,4 +39,4 @@ npm install --save-dev jest supertest
 npm start
 ```
 
-The API will be running at `http://localhost:8080`
+The API will be running at `http://localhost:3000`
