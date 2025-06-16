@@ -6,7 +6,7 @@ The Employee Management API is a RESTful service that provides comprehensive fun
 
 ## Base URL
 ```
-http://localhost:8080
+http://localhost:3000
 ```
 
 ## Authentication
@@ -27,7 +27,7 @@ For production deployment, I would also add the following:
 - API key management
 - Request logging and monitoring 
 - Relational SQL database
-- A many-to-many relations table `employee_skills` to record all separate instances of employees and skills. When reviewing the project, I have realised that employees and skills exist as two separate entities in the api (they must, for data integrity and scalability). As such, an `employee_skills` table would create the relationship needed
+- A many-to-many relations table `employee_skills` to record all separate instances of employees and skills. Employees and skills exist as two separate entities in the api (they must, for data integrity and scalability). As such, an `employee_skills` table would create the relationship needed
 
 ## Response Format
 All responses are returned in JSON format with appropriate HTTP status codes.

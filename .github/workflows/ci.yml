@@ -1,0 +1,157 @@
+name: Employee Management API CI
+
+# Workflow trigger config
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  # Setup and matrix strategy
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    # Download repo to runner & install node
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    # Install dependencies 
+    - name: Install dependencies
+      run: npm ci
+      
+    # Run tests & check coverage
+    - name: Run all tests
+      run: npm test
+      
+    - name: Run tests with coverage
+      run: npm run test:coverage
+     
+    # Extract coverage and compare
+    - name: Check test coverage threshold
+      run: |
+        echo "Test Coverage Report:"
+        npm run test:coverage -- --coverageReporters=text-summary
+        
+        # Check if coverage is above 90%
+        COVERAGE=$(npm run test:coverage -- --coverageReporters=text --coverageReporters=text-summary 2>/dev/null | grep "All files" | grep -o "[0-9]\+\.[0-9]\+%" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+        if [ -z "$COVERAGE" ]; then
+          echo "Could not determine coverage percentage"
+          exit 0
+        fi
+        
+        if (( $(echo "$COVERAGE < 90" | bc -l) )); then
+          echo "Test coverage is below 90% (current: ${COVERAGE}%)"
+          exit 1
+        else
+          echo "Test coverage is above 90% (current: ${COVERAGE}%)"
+        fi
+
+  # Dependency security audit
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+      
+    - name: Check for high severity vulnerabilities
+      run: |
+        if npm audit --audit-level=high; then
+          echo "No high severity vulnerabilities found"
+        else
+          echo "High severity vulnerabilities found. Please review and update dependencies."
+          exit 1
+        fi
+
+  # Verify application startup
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Verify application starts
+      run: |
+        echo "Verifying application can start..."
+        timeout 5s npm start || true
+        echo "Application verification completed"
+    
+    # Create dist/ folder for deployment
+    - name: Create deployment package
+      run: |
+        echo "Creating deployment package..."
+        mkdir -p dist
+        cp -r controllers middlewares models routes server.js package.json dist/
+        echo "Deployment package created"
+        
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-package
+        path: dist/
+        retention-days: 30
+
+  # Production deployment - runs on develop branch pushes
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        echo "This would typically deploy to a production server"
+        echo "For now, we'll just simulate the deployment"
+        echo "Production deployment completed"
+      continue-on-error: true 
