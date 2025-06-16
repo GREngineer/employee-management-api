@@ -97,6 +97,11 @@ employee-management-api/
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:coverage` - Run tests with coverage report
 
+## Reporting
+- HTML generated on every test run
+- Stored in coverage/lcov-report
+- `open coverage/lcov-report/index.html` to view in browser
+
 ## CI/CD Pipeline
 
 This project includes a comprehensive GitHub Actions CI/CD pipeline that automatically runs on every push and pull request to the `develop` branch.
