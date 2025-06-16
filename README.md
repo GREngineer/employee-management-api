@@ -103,7 +103,7 @@ This project includes a comprehensive GitHub Actions CI/CD pipeline that automat
 
 ### What the CI Pipeline Does:
 
-1. **Testing**: Runs all tests across multiple Node.js versions (16.x, 18.x, 20.x)
+1. **Testing**: Runs all tests across multiple Node.js versions (18.x, 20.x)
 2. **Coverage**: Generates coverage reports and ensures >90% coverage
 3. **Security**: Runs security audits to check for vulnerabilities
 4. **Build**: Verifies the application can start and creates deployment packages

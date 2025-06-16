@@ -21,7 +21,7 @@ This project uses GitHub Actions for Continuous Integration and Continuous Deplo
 
 **Steps**:
 1. **Checkout**: Clone the repository to a clean VM
-2. **Setup Node.js**: Install Node.js (16.x, 18.x, 20.x)
+2. **Setup Node.js**: Install Node.js (18.x, 20.x)
 3. **Install Dependencies**: Run `npm ci` (express, jest etc)
 4. **Run Tests**: Execute all test suites `npm test`
 5. **Coverage Report**: Generate coverage with `npm run test:coverage`
